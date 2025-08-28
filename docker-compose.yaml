@@ -1,0 +1,48 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://127.0.0.1:3000
+    restart: always
+    ports:
+      - 3001:3001
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3001
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      MONGODB_URI: mongodb://root:example@mongo:27017
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: secret
+      ACCESS_TOKEN_TTL: 3600
+    depends_on:
+      - redis
+      - mongo
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
